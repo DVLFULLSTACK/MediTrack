@@ -1,20 +1,19 @@
 import React, { useState } from "react";
 import { useEffect } from "react";
-import { FaPlus, FaTrash, FaPencilAlt, FaSearch,FaUserLock } from "react-icons/fa";
+import { FaPlus, FaTrash, FaPencilAlt, FaSearch,FaUserLock, FaUnlock } from "react-icons/fa";
 import { LiaFileImportSolid, LiaFileExportSolid } from "react-icons/lia";
 import { PiPasswordBold } from "react-icons/pi";
 
 import userService from "../../services/userService";
 import diacritics from 'diacritics'; //Loại bỏ dấu
 import { toast } from "react-toastify";
+import authService from "../../services/authService";
 
 const ManageUser = () => {
 
     
     const [users, setUsers] = useState([
-        { id: 1, name: "Aspirin", dosage: "500mg", frequency: "Twice daily", stock: 100 },
-        { id: 2, name: "Ibuprofen", dosage: "400mg", frequency: "As needed", stock: 50 },
-        { id: 3, name: "Paracetamol", dosage: "650mg", frequency: "Every 6 hours", stock: 75 },
+       
     ]);
     const fetchUser = async () => {
         const res = await userService.getAllUsers();
@@ -59,11 +58,15 @@ const ManageUser = () => {
     // );
 
     const openModal = (mode) => {
+        console.log(mode,selectedUser)
         setModalMode(mode);
         if (mode === "create") {
         setFormData({ tenNguoiDung: "", matKhau: "", mail: ""});
         } else if (mode === "update" && selectedUser) {
         setFormData({ ...selectedUser });
+        }
+        else if (mode == "change-password" && selectedUser) {
+            setFormData({ maNguoiDung:selectedUser.maNguoiDung, matKhau: "", xacNhanMatKhau: ""});
         }
         setIsModalOpen(true);
     };
@@ -92,6 +95,21 @@ const ManageUser = () => {
 
         fetchUser()
         }
+        else if (modalMode=='change-password') {
+            console.log('test')
+           
+                if (formData.matKhau==formData.xacNhanMatKhau) {
+                    const res = await authService.changePassword(formData.maNguoiDung,formData.matKhau)
+                    fetchUser()
+                    toast.success('Cập nhật thành công!')
+                }
+                else {
+                    toast.warning('Không trùng khớp!');
+                }
+                
+    
+            
+        }
         closeModal();
     };
 
@@ -103,6 +121,19 @@ const ManageUser = () => {
 
         }
     };
+    const handleChangeActive = async () => {
+        if (selectedUser) {
+            const res = await userService.activeUser(selectedUser.maNguoiDung,!selectedUser.isActive)
+            fetchUser()
+            toast.success('Cập nhật thành công!')
+
+        }
+    }
+    const handleChangePassword = async () => {
+        console.log(selectedUser);
+        
+        
+    }
     useEffect(() => {
         fetchUser()
 
@@ -141,8 +172,8 @@ const ManageUser = () => {
             <button onClick={() => openModal("create")} className="p-2 bg-green-500 text-white rounded hover:bg-green-600 transition-colors duration-200" title="Add User"><FaPlus /></button>
             <button onClick={() => openModal("update")} disabled={!selectedUser} className={`p-2 bg-yellow-500 text-white rounded hover:bg-yellow-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="Update"><FaPencilAlt /></button>
             <button onClick={handleDelete} disabled={!selectedUser} className={`p-2 bg-red-500 text-white rounded hover:bg-red-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="Delete"><FaTrash /></button>
-            <button  disabled={!selectedUser} className={`p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="ChangePassword"><PiPasswordBold /></button>
-            <button  disabled={!selectedUser} className={`p-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="Export"><FaUserLock /></button>
+            <button onClick={() => openModal("change-password")}  disabled={!selectedUser} className={`p-2 bg-blue-500 text-white rounded hover:bg-blue-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="ChangePassword"><PiPasswordBold /></button>
+            {selectedUser && <button onClick={() => handleChangeActive()} disabled={!selectedUser} className={`p-2 bg-purple-500 text-white rounded hover:bg-purple-600 transition-colors duration-200 ${!selectedUser && "opacity-50 cursor-not-allowed"}` } title="Export">{selectedUser.isActive ? <FaUserLock /> : <FaUnlock />}</button>}
 
             </div>
         </div>
@@ -152,7 +183,7 @@ const ManageUser = () => {
                 <th className="py-3 px-6 text-left">Tên nhân viên</th>
                 <th className="py-3 px-6 text-left">Mã nhân viên</th>
                 <th className="py-3 px-6 text-left">Mail</th>
-              
+                <th className="py-3 px-6 text-left">Vai trò</th>
 
             </tr>
             </thead>
@@ -161,12 +192,12 @@ const ManageUser = () => {
                 <tr
                 key={user.maNguoiDung}
                 onClick={() => handleRowClick(user)}
-                className={` cursor-pointer border-b border-gray-200 hover:bg-gray-100 ${selectedUser && selectedUser.maNguoiDung === user.maNguoiDung ? "bg-blue-100" : ""}`}
+                className={`${!user.isActive? 'text-gray-400' : ''} cursor-pointer border-b border-gray-200 hover:bg-gray-100 ${selectedUser && selectedUser.maNguoiDung === user.maNguoiDung ? "bg-blue-100" : ""}`}
                 >
                 <td className="py-3 px-6 text-left whitespace-nowrap">{user.tenNguoiDung}</td>
                 <td className="py-3 px-6 text-left">{user.maNguoiDung}</td>
                 <td className="py-3 px-6 text-left">{user.mail}</td>
-               
+                <td className="py-3 px-6 text-left">{user.vaiTro == 1 ? 'Admin' : 'Nhân viên'}</td>
                 </tr>
             ))}
             </tbody>
@@ -176,10 +207,11 @@ const ManageUser = () => {
             <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center">
             <div className="bg-white p-6 rounded-lg w-96">
                 <h2 className="text-2xl font-bold mb-4">
-                {modalMode === "create" ? "Thêm người dùng mới" : "Chỉnh sửa thông tin người dùng"}
+              
+                {modalMode === "create" ? "Thêm người dùng mới" : modalMode ===  "update" ? "Chỉnh sửa thông tin người dùng" : "Đổi mật khẩu"}
                 </h2>
                 <form onSubmit={handleSubmit}>
-                <div className="mb-4">
+                {modalMode!=='change-password' && <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="tenNguoiDung">
                     Tên người dùng
                     </label>
@@ -192,7 +224,7 @@ const ManageUser = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                </div>
+                </div>}
                 
                 {modalMode=='update' && 
                 <div className="mb-4">
@@ -210,7 +242,7 @@ const ManageUser = () => {
                     disabled
                     />
                 </div>}
-                <div className="mb-4">
+                {modalMode!=='change-password' && <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="congDung">
                     Mail
                     </label>
@@ -224,7 +256,8 @@ const ManageUser = () => {
                     required
                     />
                 </div>
-                <div className="mb-4">
+        }
+               {(modalMode=='create' || modalMode=='change-password')   && <div className="mb-4">
                     <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="matKhau">
                     Mật khẩu
                     </label>
@@ -237,7 +270,21 @@ const ManageUser = () => {
                     className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                     required
                     />
-                </div>
+                </div>}
+                {( modalMode=='change-password')   && <div className="mb-4">
+                    <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="xacNhanMatKhau">
+                    Xác nhận mật khẩu
+                    </label>
+                    <input
+                    type="password"
+                    id="xacNhanMatKhau"
+                    name="xacNhanMatKhau"
+                    value={formData.xacNhanMatKhau}
+                    onChange={handleInputChange}
+                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                    required
+                    />
+                </div>}
                 <div className="flex justify-end">
                     <button
                     type="button"

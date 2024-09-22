@@ -145,7 +145,6 @@ const ManageMedicine = () => {
                 <th className="py-3 px-6 text-left">Mã thuốc</th>
                 <th className="py-3 px-6 text-left">Công dụng</th>
                 <th className="py-3 px-6 text-left">Số lượng tồn</th>
-                <th className="py-3 px-6 text-left">Nhà cung cấp</th>
 
             </tr>
             </thead>
@@ -160,7 +159,6 @@ const ManageMedicine = () => {
                 <td className="py-3 px-6 text-left">{medicine.maThuoc}</td>
                 <td className="py-3 px-6 text-left">{medicine.congDung}</td>
                 <td className="py-3 px-6 text-left">{medicine.soLuongTon==null ? 'Chưa được nhập' : medicine.soLuongTon}</td>
-                <td className="py-3 px-6 text-left">{medicine.tenNhaCungCap==null ? 'N/A' : medicine.tenNhaCungCap}</td>
                 </tr>
             ))}
             </tbody>

@@ -8,5 +8,7 @@ router.get('/:id', userController.getUserById);  // Get by ID
 router.post('/', userController.createUser);
 router.put('/:id', userController.updateUser);    // Update
 router.delete('/:id', userController.softDeleteUser);  // Soft Delete
+router.patch('/active/:id', userController.changeActiveUser);  // Soft Delete
+
 
 module.exports = router;

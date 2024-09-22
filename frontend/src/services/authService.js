@@ -13,9 +13,15 @@ const loginUser = async (loginData) => {
     return response.data;
 };
 
+const changePassword = async (id,matKhau) => {
+    const response = await axios.patch(`${API_URL}/change-password/${id}`, {matKhau});
+    return response.data;
+};
+
 const authService = {
     loginUser,
-    registerUser
+    registerUser,
+    changePassword
 }
 
 export default authService;

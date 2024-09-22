@@ -68,3 +68,19 @@ exports.softDeleteUser = async (req, res) => {
         res.status(500).json({ message: error.message });
     }
 };
+
+exports.changeActiveUser = async (req, res) => {
+    const { id } = req.params;
+    const { isActive } = req.body;
+    try {
+        const result = await req.db.query(
+            `UPDATE "nguoiDung" SET "isActive" = $1
+             WHERE "maNguoiDung" = $2 AND "xoa" = FALSE RETURNING *`,
+            [isActive, id]
+        );
+        if (result.rows.length === 0) return res.status(404).json({ message: 'User not found' });
+        res.json(result.rows[0]);
+    } catch (error) {
+        res.status(500).json({ message: error.message });
+    }
+};

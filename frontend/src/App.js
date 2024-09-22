@@ -8,6 +8,9 @@ import Sidebar from './components/sidebar/sidebar';
 import ManageMedicine from './pages/ManageMedicine/manageMedicine';
 import ManageUser from './pages/ManageUser/manageUser';
 import ManageSupplier from './pages/ManageSupplier/manageSupplier';
+import Import from './pages/Import/import';
+import Export from './pages/Export/export';
+import Home from './pages/Home/home';
 
 function App() {
   return (
@@ -19,7 +22,10 @@ function App() {
         <Route path="/medicine" element={<ManageMedicine />} />
         <Route path='/user' element={<ManageUser />} />
         <Route path='/supplier' element={<ManageSupplier />} />
-
+        <Route path='/import' element={<Import />} />
+        <Route path='/export' element={<Export />} />
+        <Route path='/home' element={<Home />} />
+        <Route path='*'  element={<Navigate to="/home" replace />} />
 
 
       </Routes>

@@ -3,10 +3,12 @@ import { FaEye, FaEyeSlash, FaSpinner } from 'react-icons/fa';
 import { GiMedicines } from 'react-icons/gi';
 import userService from '../../services/userService';
 import authService from '../../services/authService';
+import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 
 
 const LoginSignupPage = () => {
+  const navigate = useNavigate()
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -33,13 +35,21 @@ const LoginSignupPage = () => {
   const handleLogin = async () => {
     try {
       const res = await authService.loginUser({
-        mail: email, matKhau: password
-      })
-      toast.success('Đăng nhập thành công!')
-    }
-    catch(err) {
-      toast.error('Đăng nhập thất bại!')
-    }
+          mail: email, 
+          matKhau: password
+      });
+      
+      if (res.token) {
+          localStorage.setItem('token', res.token);
+          localStorage.setItem('user', JSON.stringify(res.user));
+          navigate('/home');
+          toast.success('Đăng nhập thành công!');
+      }
+  } catch (err) {
+      // Kiểm tra nếu có thông tin lỗi từ phản hồi
+      const errorMessage = err.response ? err.response.data.message : 'Đăng nhập thất bại!';
+      toast.error(errorMessage); // Hiển thị thông báo lỗi cụ thể
+  }
     
   }
 
@@ -49,6 +59,7 @@ const LoginSignupPage = () => {
         mail: email, matKhau: password, tenNguoiDung: name, vaiTro: 1
       })
       toast.success('Đăng ký thành công!')
+      setIsLogin(true)
     }
     catch (err) {
       toast.error('Đăng ký thất bại!')

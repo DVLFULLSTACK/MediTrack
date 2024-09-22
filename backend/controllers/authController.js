@@ -35,25 +35,49 @@ exports.login = async (req, res) => {
     const { mail, matKhau } = req.body;
 
     try {
-        // Tìm người dùng theo email
         const user = await req.db.query('SELECT * FROM "nguoiDung" WHERE "mail" = $1', [mail]);
+        
         if (user.rows.length === 0) {
-            return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
+            return res.status(400).json({ message: 'Sai email hoặc mật khẩu' }); // Thêm return ở đây
         }
 
         const foundUser = user.rows[0];
 
-        // So sánh mật khẩu
-        const isMatch = await bcrypt.compare(matKhau, foundUser.matKhau);
-        if (!isMatch) {
-            return res.status(400).json({ message: 'Sai email hoặc mật khẩu' });
+        if (!foundUser.isActive) {
+            return res.status(400).json({ message: 'Tài khoản đã bị khóa' }); // Thêm return ở đây
         }
 
-        // Tạo token
-        const token = jwt.sign({ id: foundUser.maNguoiDung, mail: foundUser.mail }, secretKey, { expiresIn: '1h' });
+        const isMatch = await bcrypt.compare(matKhau, foundUser.matKhau);
+        if (!isMatch) {
+            return res.status(400).json({ message: 'Sai email hoặc mật khẩu' }); // Thêm return ở đây
+        }
 
-        res.json({ token, user: { mail: foundUser.mail, tenNguoiDung: foundUser.tenNguoiDung, vaiTro: foundUser.vaiTro } });
+        const token = jwt.sign({ id: foundUser.maNguoiDung, mail: foundUser.mail }, secretKey, { expiresIn: '1h' });
+        return res.json({ token, user: { mail: foundUser.mail, tenNguoiDung: foundUser.tenNguoiDung, vaiTro: foundUser.vaiTro } }); // Thêm return ở đây
+    } catch (error) {
+        console.error('Lỗi đăng nhập:', error);
+        return res.status(500).json({ message: 'Đã xảy ra lỗi, vui lòng thử lại sau!' }); // Thêm return ở đây
+    }
+};
+
+exports.changePassword = async (req,res) => {
+    const {id} = req.params;
+    const {  matKhau } = req.body;
+    
+    try {
+        // Tìm người dùng theo email
+        console.log(matKhau,id);
+        const hashedPassword = await bcrypt.hash(matKhau, 10);
+
+        const result =  await req.db.query(`UPDATE "nguoiDung" SET "matKhau" = $1 WHERE "maNguoiDung"=$2 RETURNING *`,[hashedPassword,id])
+
+        // So sánh mật khẩu
+       
+        // Tạo token
+        if (result.rows.length>0)
+        res.json(result.rows[0]);
     } catch (error) {
         res.status(500).json({ message: error.message });
     }
-};
+}
+

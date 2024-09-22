@@ -23,6 +23,12 @@ const updateUser = async (id, userData) => {
     return response.data;
 };
 
+const activeUser = async (id, isActive) => {
+    console.log(isActive);
+    const response = await axios.patch(`${API_URL}/active/${id}`, {isActive});
+    return response.data;
+};
+
 const softDeleteUser = async (id) => {
     const response = await axios.delete(`${API_URL}/${id}`);
     return response.data;
@@ -34,5 +40,6 @@ const userService = {
     updateUser,
     createUser,
     softDeleteUser,
+    activeUser,
 }
 export default userService;

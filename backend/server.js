@@ -13,6 +13,10 @@ const medicRoute = require('./routes/medicRoute');
 const supplierRoute = require('./routes/supplierRoute')
 const userRoute = require('./routes/userRoute')
 const authRoute = require('./routes/authRoute')
+const stockEntryRoute = require('./routes/stockEntryRoute');
+const stockEntryDetailRoute = require('./routes/stockEntryDetailRoute')
+const purchaseOrderRoute = require('./routes/purchaseOrderRoute')
+const purchaseOrderDetailRoute = require('./routes/purchaseOrderDetailRoute')
 
 
 const pool = new Pool({
@@ -38,6 +42,10 @@ app.use('/api/medics/',medicRoute);
 app.use('/api/suppliers/',supplierRoute);
 app.use('/api/users/',userRoute);
 app.use('/api/auth/',authRoute);
+app.use('/api/stock-entries/',stockEntryRoute);
+app.use('/api/stock-entry-details/',stockEntryDetailRoute);
+app.use('/api/purchase-orders/',purchaseOrderRoute);
+app.use('/api/purchase-order-details/',purchaseOrderDetailRoute);
 
 
 // Khởi động server
